@@ -6,9 +6,11 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signinSchema, type SigninData } from "../schema/schema";
+import { useNavigate } from "react-router";
 
 export default function SignIn({ setIsLogin }: LoginProps) {
 	const { handleSignIn } = useContext(AuthContext);
+	const nav = useNavigate();
 	const [fieldFocused, setFieldFocused] = useState<string | null>(null);
 	const {
 		register,
@@ -23,12 +25,17 @@ export default function SignIn({ setIsLogin }: LoginProps) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	async function onSubmit(data: SigninData) {
-		await handleSignIn(data);
+		const response = await handleSignIn(data);
+		if (response) {
+			nav("/", {
+				replace: true,
+			});
+			return;
+		}
 	}
 	function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
 		setFieldFocused(e.target.name);
 	}
-
 	function handleBlur() {
 		setFieldFocused(null);
 	}

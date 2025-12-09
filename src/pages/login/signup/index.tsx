@@ -22,12 +22,16 @@ export default function SignUp({ setIsLogin }: LoginProps) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	async function onSubmit(data: SignupData) {
-		await handleSignUp(data);
+		const response = await handleSignUp(data);
+		if (response) {
+			reset();
+			setIsLogin(true);
+			return;
+		}
 	}
 	function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
 		setFieldFocused(e.target.name);
 	}
-
 	function handleBlur() {
 		setFieldFocused(null);
 	}
