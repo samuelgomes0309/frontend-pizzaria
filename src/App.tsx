@@ -5,10 +5,15 @@ import Login from "./pages/login";
 import Private from "./routes/Private";
 import Category from "./pages/category";
 import Product from "./pages/product";
+import { AppProvider } from "./contexts/app/AppProvider";
 
 const router = createBrowserRouter([
 	{
-		element: <Layout />,
+		element: (
+			<AppProvider>
+				<Layout />
+			</AppProvider>
+		),
 		children: [
 			{
 				path: "/",
