@@ -7,7 +7,7 @@ import { AppContext } from "../../contexts/app/AppContext";
 
 export default function Category() {
 	const { createCategory } = useContext(AppContext);
-	const [fieldFocused, setFieldFocuse] = useState<string | null>(null);
+	const [fieldFocused, setFieldFocused] = useState<string | null>(null);
 	const {
 		reset,
 		register,
@@ -49,8 +49,8 @@ export default function Category() {
 				`}
 						placeholder={"Digite o nome da categoria"}
 						type={"text"}
-						onFocus={() => setFieldFocuse("name")}
-						onBlur={() => setFieldFocuse(null)}
+						onFocus={() => setFieldFocused("name")}
+						onBlur={() => setFieldFocused(null)}
 					/>
 					{errors.name?.message && (
 						<span className="text-red-600 my-1">{errors.name?.message} </span>
