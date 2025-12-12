@@ -6,10 +6,18 @@ import { productSchema, type ProductFormData } from "./schema/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import InputProduct from "./components/input";
 import ErrorMsg from "./components/error";
+import { toast } from "react-toastify";
+
+interface ImageFileProps {
+	id: string;
+	previewUrl: string;
+	file: File;
+}
 
 export default function Product() {
 	const [fieldFocused, setFieldFocused] = useState<string | null>(null);
-
+	const [image, setImage] = useState<ImageFileProps | null>(null);
+	const [imageError, setImageError] = useState<boolean>(false);
 	const {
 		register,
 		handleSubmit,
@@ -18,6 +26,11 @@ export default function Product() {
 		resolver: zodResolver(productSchema),
 	});
 	async function onsubmit(data: ProductFormData) {
+		if (!image?.file) {
+			toast.error("Necessario anexar pelo menos uma imagem.");
+			setImageError(true);
+			return;
+		}
 		alert("chamou");
 		console.log(data);
 	}
@@ -27,20 +40,58 @@ export default function Product() {
 	function handleBlur() {
 		setFieldFocused(null);
 	}
-
+	function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+		const files = e.target.files;
+		if (!files || !files.length) {
+			setImageError(true);
+			return;
+		}
+		const img = files[0];
+		if (!img.type.startsWith("image/")) {
+			toast.error("Formato inválido. Apenas imagens são permitidas.");
+			return;
+		}
+		if (img.size > 5 * 1024 * 1024) {
+			toast.error(`Imagem muito grande. Máximo permitido: ${5} MB.`);
+			return;
+		}
+		const imgObj: ImageFileProps = {
+			id: crypto.randomUUID(),
+			previewUrl: URL.createObjectURL(img),
+			file: img,
+		};
+		setImage(imgObj);
+		setImageError(false);
+	}
 	return (
 		<Container>
 			<div className="w-full max-w-3xl mx-auto flex flex-col justify-center  mt-5 p-4">
 				<span className="text-2xl text-white italic font-medium text-start mb-2">
 					Nova Produto
 				</span>
-				<div className="bg-[#101026] w-full border border-gray-400   rounded-lg h-40 transition duration-500 hover:scale-101">
+				<div
+					className={`bg-[#101026] w-full border   rounded-lg h-40 transition duration-500 hover:scale-101 ${
+						imageError && "border-red-500"
+					} ${
+						!imageError && image?.previewUrl.trim()
+							? "border-2 border-green-700"
+							: "border-gray-400 "
+					} `}
+				>
 					<div className=" w-full h-full flex justify-center items-center  relative">
 						<Plus size={35} color="#99a1af" />
 						<input
 							type="file"
 							accept="image/*"
-							className="absolute w-full h-full opacity-0 cursor-pointer"
+							onChange={(e) => handleFile(e)}
+							className="absolute w-full h-full opacity-0  z-20 cursor-pointer"
+						/>
+						<img
+							alt="Imagem do produto"
+							src={image?.previewUrl}
+							className={`absolute w-full h-full rounded-lg cursor-pointer  object-cover ${
+								image?.previewUrl ? "block" : "hidden"
+							}`}
 						/>
 					</div>
 				</div>
@@ -94,7 +145,7 @@ export default function Product() {
 						key={"description"}
 						{...register("description")}
 						placeholder="Digite a descrição do produto"
-						className={`resize-none bg-[#101026] w-full border border-gray-400 rounded-lg h-26  text-white placeholder:text-gray-400 px-4 py-2 ${
+						className={`resize-none bg-[#101026] w-full border mt-2 border-gray-400 rounded-lg h-26  text-white placeholder:text-gray-400 px-4 py-2 ${
 							errors.description?.message && "outline-red-600 outline-2"
 						}
 					${
