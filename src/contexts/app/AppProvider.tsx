@@ -26,9 +26,40 @@ export interface ProductProps {
 	description: string;
 }
 
+export interface OrderProps {
+	id: string;
+	table: number;
+	status: boolean;
+	draft: boolean;
+	name: string | null;
+}
+
+export interface OrderItemProps {
+	id: string;
+	amount: number;
+	orderId: string;
+	productId: string;
+	created_at: string;
+	updated_at: string;
+	product: ProductProps;
+}
+export interface DetailOrderProps extends OrderProps {
+	items: OrderItemProps[];
+}
+
 export function AppProvider({ children }: ContextProvider) {
 	const [listCategory, setListCategory] = useState<CategoryProps[]>([]);
 	const [listProducts, setProducts] = useState<ProductProps[]>([]);
+	const [listOrders, setListOrders] = useState<OrderProps[]>([]);
+	const [detailOrder, setDetailOrder] = useState<DetailOrderProps | null>(null);
+	const handleListOrders = useCallback(async () => {
+		try {
+			const response = await api.get("/orders");
+			setListOrders(response.data);
+		} catch (error) {
+			console.log(error);
+		}
+	}, []);
 	async function createCategory(data: CategoryFormData) {
 		try {
 			await api.post("/add/category", data);
@@ -77,6 +108,28 @@ export function AppProvider({ children }: ContextProvider) {
 			console.log(error);
 		}
 	}, []);
+	const handleDetailOrder = useCallback(async (order_id: string) => {
+		try {
+			const response = await api.get("/order/detail", {
+				params: { order_id },
+			});
+			setDetailOrder(response.data);
+			return true;
+		} catch (error) {
+			console.error(error);
+			setDetailOrder(null);
+			return false;
+		}
+	}, []);
+	const handleCloseOrder = useCallback(async (order_id: string) => {
+		try {
+			await api.post(`/order/${order_id}/closeOrder`);
+			setListOrders((prev) => prev.filter((order) => order.id !== order_id));
+			setDetailOrder(null);
+		} catch (error) {
+			console.log(error);
+		}
+	}, []);
 	return (
 		<AppContext.Provider
 			value={{
@@ -86,6 +139,12 @@ export function AppProvider({ children }: ContextProvider) {
 				createProduct,
 				handleListProducts,
 				listProducts,
+				handleListOrders,
+				listOrders,
+				detailOrder,
+				handleDetailOrder,
+				setDetailOrder,
+				handleCloseOrder,
 			}}
 		>
 			{children}
