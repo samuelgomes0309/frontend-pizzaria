@@ -1,12 +1,18 @@
 import { createContext } from "react";
 import type { CategoryFormData } from "../../pages/category/schema/schema";
-import type { CategoryProps, CreateProductProps } from "./AppProvider";
+import type {
+	CategoryProps,
+	CreateProductProps,
+	ProductProps,
+} from "./AppProvider";
 
 interface ContextData {
 	createCategory: (data: CategoryFormData) => Promise<boolean>;
 	listCategory: CategoryProps[];
 	handleListCategories: () => Promise<void>;
 	createProduct: (data: CreateProductProps) => Promise<boolean>;
+	handleListProducts: () => Promise<void>;
+	listProducts: ProductProps[];
 }
 
 export const AppContext = createContext({} as ContextData);

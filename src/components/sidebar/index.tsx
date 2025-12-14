@@ -19,7 +19,7 @@ export default function Sidebar() {
 				Nova Categoria
 			</Link>
 			<Link
-				to={"/new-product"}
+				to={"/products"}
 				className="text-white transition-all duration-500 hover:scale-105"
 			>
 				Cardapio

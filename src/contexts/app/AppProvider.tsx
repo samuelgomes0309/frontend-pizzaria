@@ -18,8 +18,17 @@ export interface CreateProductProps extends ProductFormData {
 	file: File;
 }
 
+export interface ProductProps {
+	banner: string;
+	id: string;
+	name: string;
+	price: number;
+	description: string;
+}
+
 export function AppProvider({ children }: ContextProvider) {
 	const [listCategory, setListCategory] = useState<CategoryProps[]>([]);
+	const [listProducts, setProducts] = useState<ProductProps[]>([]);
 	async function createCategory(data: CategoryFormData) {
 		try {
 			await api.post("/add/category", data);
@@ -60,6 +69,14 @@ export function AppProvider({ children }: ContextProvider) {
 			return false;
 		}
 	}
+	const handleListProducts = useCallback(async () => {
+		try {
+			const response = await api.get("/products");
+			setProducts(response.data);
+		} catch (error) {
+			console.log(error);
+		}
+	}, []);
 	return (
 		<AppContext.Provider
 			value={{
@@ -67,6 +84,8 @@ export function AppProvider({ children }: ContextProvider) {
 				listCategory,
 				handleListCategories,
 				createProduct,
+				handleListProducts,
+				listProducts,
 			}}
 		>
 			{children}
