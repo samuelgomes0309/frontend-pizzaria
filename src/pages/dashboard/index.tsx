@@ -15,6 +15,7 @@ export default function Dashboard() {
 		handleCloseOrder,
 	} = useContext(AppContext);
 	const [loadingOrders, setLoadingOrders] = useState<boolean>(true);
+	const [loadingModal, setLoadingModal] = useState<boolean>(false);
 	const [loadingRefreshOrders, setLoadingRefreshOrders] =
 		useState<boolean>(false);
 	const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -26,17 +27,22 @@ export default function Dashboard() {
 		loadProducts();
 	}, [handleListOrders]);
 	async function handleModal(order_id: string, modalVisible: boolean) {
-		if (!order_id) {
-			return;
-		}
-		if (!modalVisible && order_id) {
+		if (!modalVisible) {
 			setDetailOrder(null);
 			setModalVisible(false);
 			return;
 		}
-		const response = await handleDetailOrder(order_id);
-		if (response) {
-			setModalVisible(true);
+		if (!order_id) return;
+		try {
+			setLoadingModal(true);
+			const response = await handleDetailOrder(order_id);
+			if (response) {
+				setModalVisible(true);
+			}
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setLoadingModal(false);
 		}
 	}
 	async function handleRefreshOrders() {
@@ -64,11 +70,16 @@ export default function Dashboard() {
 					<button
 						type="button"
 						onClick={handleRefreshOrders}
+						disabled={loadingRefreshOrders}
 						className={`transition-all duration-500  px-3 text-[#3fffa3] hover:scale-105 hover:cursor-pointer ${
-							loadingRefreshOrders && "animate-spin hover:cursor-not-allowed"
+							loadingRefreshOrders && "disabled:cursor-not-allowed "
 						}`}
 					>
-						<RefreshCcw />
+						<RefreshCcw
+							className={`${
+								loadingRefreshOrders && "animate-spin text-blue-600"
+							}`}
+						/>
 					</button>
 				</div>
 				{listOrders.length === 0 ? (
@@ -79,7 +90,13 @@ export default function Dashboard() {
 					<>
 						<div className="mt-2 gap-2 flex flex-col">
 							{listOrders.map((item) => (
-								<CardOrder key={item.id} item={item} modal={handleModal} />
+								<CardOrder
+									key={item.id}
+									item={item}
+									modal={handleModal}
+									loadingRefresh={loadingRefreshOrders}
+									loadingModal={loadingModal}
+								/>
 							))}
 						</div>
 						{modalVisible && detailOrder && (
